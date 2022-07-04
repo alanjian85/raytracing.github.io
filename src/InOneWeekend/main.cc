@@ -112,13 +112,13 @@ int main() {
 
     camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
 
-    // Render
     std::vector<color> framebuffer(image_width * image_height);
-
-    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
     int scanlines_remaining = image_height;
     std::cerr << "\rScanlines remaining: " << scanlines_remaining << std::flush;
+
+    // Render
+    
+    std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
     #pragma omp parallel for
     for (int j = 0; j < image_height; ++j) {
@@ -132,7 +132,7 @@ int main() {
             }
             framebuffer[j * image_width + i] = pixel_color;
         }
-#pragma omp critical
+    #pragma omp critical
         std::cerr << "\rScanlines remaining: " << --scanlines_remaining << ' ' << std::flush;
     }
 
