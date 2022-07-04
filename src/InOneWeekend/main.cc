@@ -18,7 +18,7 @@
 #include "sphere.h"
 
 #include <iostream>
-
+#include <vector>
 
 color ray_color(const ray& r, const hittable& world, int depth) {
     hit_record rec;
@@ -113,11 +113,15 @@ int main() {
     camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
 
     // Render
+    std::vector<color> framebuffer(image_width * image_height);
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-    for (int j = image_height-1; j >= 0; --j) {
-        std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
+    int scanlines_remaining = image_height;
+    std::cerr << "\rScanlines remaining: " << scanlines_remaining << std::flush;
+
+    #pragma omp parallel for
+    for (int j = 0; j < image_height; ++j) {
         for (int i = 0; i < image_width; ++i) {
             color pixel_color(0,0,0);
             for (int s = 0; s < samples_per_pixel; ++s) {
@@ -126,9 +130,17 @@ int main() {
                 ray r = cam.get_ray(u, v);
                 pixel_color += ray_color(r, world, max_depth);
             }
-            write_color(std::cout, pixel_color, samples_per_pixel);
+            framebuffer[j * image_width + i] = pixel_color;
         }
+#pragma omp critical
+        std::cerr << "\rScanlines remaining: " << --scanlines_remaining << ' ' << std::flush;
     }
 
     std::cerr << "\nDone.\n";
+
+    for (int j = image_height-1; j >= 0; --j) {
+        for (int i = 0; i < image_width; ++i) {
+            write_color(std::cout, framebuffer[j * image_width + i], samples_per_pixel);
+        }
+    }
 }

@@ -81,3 +81,8 @@ add_executable(sphere_importance src/TheRestOfYourLife/sphere_importance.cc ${CO
 add_executable(sphere_plot       src/TheRestOfYourLife/sphere_plot.cc       ${COMMON_ALL})
 
 include_directories(src/common)
+
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(inOneWeekend PUBLIC OpenMP::OpenMP_CXX)
+endif()
