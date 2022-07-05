@@ -268,7 +268,11 @@ hittable_list final_scene() {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cerr << "Usage: TheNextWeek <scene>\n";
+        return -1;
+    }
 
     // Image
 
@@ -287,7 +291,8 @@ int main() {
     auto aperture = 0.0;
     color background(0,0,0);
 
-    switch (0) {
+    int scene = std::stoi(argv[1]);
+    switch (scene) {
         case 1:
             world = random_scene();
             background = color(0.70, 0.80, 1.00);
